@@ -27,7 +27,7 @@ const photoId = getRandomUniqueInteger(MIN_PHOTO_ID, PHOTOS_COUNT);
 const userId = getRandomUniqueInteger(MIN_COMMENT_ID, MAX_COMMENT_ID);
 
 // Функция генерирует один комментарий.
-function createCommentContent() {
+const createCommentContent = () => {
   const id = userId();
   const avatarNumber = getRandomInteger(MIN_AVATAR_NUMBER, MAX_AVATAR_NUMBER);
   return {
@@ -36,17 +36,17 @@ function createCommentContent() {
     message: getRandomArrayElement(MESSAGES),
     name: getRandomArrayElement(NAMES)
   };
-}
+};
 
 // Количество комментариев к каждой фотографии — случайное число от 0 до 30.
 // Данная функция генерирует от 0 до 30 комментариев.
-function createComments() {
+const createComments = () => {
   const commentsCount = getRandomInteger(MIN_COMMENT_NUMBER, MAX_COMMENT_NUMBER);
   return Array.from({length: commentsCount}, createCommentContent);
-}
+};
 
 // Функция генерирует описание одной фотографии.
-function createPhotoDescription() {
+const createPhotoDescription = () => {
   const id = photoId();
   return {
     id: id,
@@ -55,11 +55,9 @@ function createPhotoDescription() {
     likes: getRandomInteger(MIN_LIKES_COUNT, MAX_LIKES_COUNT),
     comments: createComments()
   };
-}
+};
 
 // Данная функция генерирует 25 описаний фотографий.
-function createPhotosGallery() {
-  return Array.from({length: PHOTOS_COUNT}, createPhotoDescription);
-}
+const createPhotosGallery = () => Array.from({length: PHOTOS_COUNT}, createPhotoDescription);
 
 export {createPhotosGallery};
