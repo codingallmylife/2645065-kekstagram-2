@@ -3,19 +3,25 @@ import {createPhotosGallery} from './data.js';
 const thumbnail = document.querySelector('.pictures');
 const thumbnailTemplate = document.querySelector('#picture').content.querySelector('.picture');
 const photoGallery = createPhotosGallery();
-const thumbnailFragment = document.createDocumentFragment();
 
 const createThumbnail = (photo) => {
-  const thumbnailElement = thumbnailTemplate.cloneNode(true);
-  const pictureImage = thumbnailElement.querySelector('.picture__img');
+  const photoThumbnail = thumbnailTemplate.cloneNode(true);
+  const pictureImage = photoThumbnail.querySelector('.picture__img');
   pictureImage.src = photo.url;
   pictureImage.alt = photo.description;
-  thumbnailElement.querySelector('.picture__likes').textContent = photo.likes;
-  thumbnailElement.querySelector('.picture__comments').textContent = photo.comments.length;
-  thumbnailFragment.appendChild(thumbnailElement);
+  photoThumbnail.querySelector('.picture__likes').textContent = photo.likes;
+  photoThumbnail.querySelector('.picture__comments').textContent = photo.comments.length;
+  photoThumbnail.dataset.id = photo.id; //Это добавляет атрибут data-id к самому элементу <li class="picture">
+  return photoThumbnail;
 };
 
-photoGallery.forEach((photo) => {
-  createThumbnail(photo);
-});
-thumbnail.appendChild(thumbnailFragment);
+const renderThumbnails = () => {
+  const thumbnailFragment = document.createDocumentFragment();
+  photoGallery.forEach((photo) => {
+    const thumbnailElement = createThumbnail(photo);
+    thumbnailFragment.appendChild(thumbnailElement);
+  });
+  thumbnail.appendChild(thumbnailFragment);
+};
+
+export {photoGallery, renderThumbnails, thumbnail};
