@@ -25,4 +25,7 @@ const getRandomUniqueInteger = (min, max) => {
 // Функция получает случайный элемент массива.
 const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
 
-export {getRandomInteger, getRandomUniqueInteger, getRandomArrayElement};
+// Функция проверяет, нажата ли клавиша Escape.
+const isEscapeKey = (evt) => evt.key === 'Escape';
+
+export {getRandomInteger, getRandomUniqueInteger, getRandomArrayElement, isEscapeKey};
