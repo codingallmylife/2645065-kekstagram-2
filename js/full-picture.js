@@ -1,58 +1,89 @@
 import {isEscapeKey} from './utils.js';
 
+const COUNT_STEP = 5;
+// eslint-disable-next-line prefer-const
+let shownCommentsCount = 0;
+let currentPhoto = null; // Текущий объект фотографии, открытой в полноразмерном окне. Нужен, чтобы обработчик кнопки "Загрузить ещё" знал, из какого массива брать следующие комментарии
 const bigPictureContent = document.querySelector('.big-picture'); // всё содержимое окна с картинкой
 const bigPictureCloseElement = bigPictureContent.querySelector('.big-picture__cancel'); // кнопка закрытия окна
-const bigPicture = bigPictureContent.querySelector('img'); // сама полноразмерная картинка
+const bigPicture = bigPictureContent.querySelector('img'); // сама полноразмерная картинка в DOM
 const bigPictureLikes = bigPictureContent.querySelector('.likes-count');
-const bigPictureCommentCount = bigPictureContent.querySelector('.social__comment-total-count');
-const bigPictureCommentShown = bigPictureContent.querySelector('.social__comment-shown-count');
+const bigPictureCommentsTotal = bigPictureContent.querySelector('.social__comment-total-count');
+const bigPictureCommentsShown = bigPictureContent.querySelector('.social__comment-shown-count');
 const bigPictureComments = bigPictureContent.querySelector('.social__comments'); // список комментариев
-const commentsCount = bigPictureContent.querySelector('.social__comment-count'); // текст "Х из Y комментариев"
-const commentsLoader = bigPictureContent.querySelector('.comments-loader'); // текст "Загрузить ещё"
 const bigPictureDescription = bigPictureContent.querySelector('.social__caption');
+const commentsLoader = bigPictureContent.querySelector('.comments-loader'); // текст "Загрузить ещё"
 
-const renderPhotoComments = (photo) => {
-  photo.comments.forEach((comment) => {
-    const list = document.createElement('li');
-    list.classList.add('social__comment');
-    const image = document.createElement('img');
-    image.classList.add('social__picture');
-    image.src = comment.avatar;
-    image.alt = comment.name;
-    image.width = 35;
-    image.height = 35;
-    list.appendChild(image);
-    const paragraph = document.createElement('p');
-    paragraph.classList.add('social__text');
-    paragraph.textContent = comment.message;
-    list.appendChild(paragraph);
-    bigPictureComments.appendChild(list);
+const renderPhotoComments = (photo, from, to) => {
+  const commentsToShow = photo.comments.slice(from, to);
+  let commentsHTML = '';
+  commentsToShow.forEach((comment) => {
+    commentsHTML +=
+    `<li class="social__comment">
+      <img
+        class="social__picture"
+        src="${comment.avatar}"
+        alt="${comment.name}"
+        width="35"
+        height="35"
+      >
+      <p class="social__text">${comment.message}</p>
+    </li>`;
   });
+  bigPictureComments.insertAdjacentHTML('beforeend', commentsHTML);
 };
 
 const renderBigPicture = (photo) => {
   bigPicture.src = photo.url;
   bigPictureLikes.textContent = photo.likes;
-  bigPictureCommentCount.textContent = photo.comments.length;
-  bigPictureCommentShown.textContent = photo.comments.length;
   bigPictureDescription.textContent = photo.description;
-  renderPhotoComments(photo);
 };
+
+const showComments = (photo) => {
+  bigPictureComments.innerHTML = '';
+  currentPhoto = photo;
+  const totalCount = photo.comments.length;
+  const initialCount = Math.min(COUNT_STEP, totalCount);
+  renderPhotoComments(photo, shownCommentsCount, initialCount);
+  shownCommentsCount = initialCount;
+  bigPictureCommentsTotal.textContent = totalCount;
+  bigPictureCommentsShown.textContent = initialCount;
+  if (initialCount >= totalCount) { // Учитывает оба случая: totalCount <=5 и totalCount >=30
+    commentsLoader.classList.add('hidden');
+  } else {
+    commentsLoader.classList.remove('hidden');
+  }
+};
+
+commentsLoader.addEventListener('click', () => { // обработчик кнопки "Загрузить ещё"
+  if (!currentPhoto) {
+    return; // Если currentPhoto не установлена (окно закрыто или ошибка) - выходим из обработчика, чтобы избежать ошибки
+  }
+  const total = currentPhoto.comments.length;
+  const newCount = Math.min(shownCommentsCount + COUNT_STEP, total);
+  if (shownCommentsCount < newCount) {
+    renderPhotoComments(currentPhoto, shownCommentsCount, newCount);
+    shownCommentsCount = newCount;
+    bigPictureCommentsShown.textContent = newCount;
+    if (newCount >= total) { // Учитывает оба случая: total <=5 и total >=30
+      commentsLoader.classList.add('hidden');
+    }
+  }
+});
 
 const openBigPicture = (photo) => {
   document.body.classList.add('modal-open');
   bigPictureContent.classList.remove('hidden');
   document.addEventListener('keydown', onDocumentKeydown);
-  commentsCount.classList.add('hidden');
-  commentsLoader.classList.add('hidden');
-  bigPictureComments.innerHTML = '';
   renderBigPicture(photo);
+  showComments(photo);
 };
 
 const closeBigPicture = () => {
   bigPictureContent.classList.add('hidden');
   document.removeEventListener('keydown', onDocumentKeydown);
   document.body.classList.remove('modal-open');
+  shownCommentsCount = 0;
 };
 
 bigPictureCloseElement.addEventListener('click', () => {
