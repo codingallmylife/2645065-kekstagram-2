@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="vendor/nouislider/nouislider.css">
   <title>Кекстаграм</title>
 </head>
 
@@ -31,12 +32,14 @@
       <section class="img-upload">
         <div class="img-upload__wrapper">
           <h2 class="img-upload__title  visually-hidden">Загрузка фотографии</h2>
-          <form class="img-upload__form" id="upload-select-image" autocomplete="off">
+          <form class="img-upload__form" id="upload-select-image" action="https://31.javascript.htmlacademy.pro/kekstagram" method="post" enctype="multipart/form-data" autocomplete="off">
 
             <!-- Изначальное состояние поля для загрузки изображения -->
             <fieldset class="img-upload__start">
-              <input type="file" id="upload-file" class="img-upload__input  visually-hidden" name="filename" required>
-              <label for="upload-file" class="img-upload__label  img-upload__control">Загрузить</label>
+              <div class="img-upload__field-wrapper">
+                <input type="file" id="upload-file" class="img-upload__input  visually-hidden" name="filename" required>
+                <label for="upload-file" class="img-upload__label  img-upload__control">Загрузить</label>
+              </div>
             </fieldset>
 
             <!-- Форма редактирования изображения -->
@@ -234,6 +237,7 @@
       <h2 class="data-error__title">Не удалось загрузить данные</h2>
     </section>
   </template>
+  <script src="vendor/pristine/pristine.min.js"></script>
   <script src="js/main.js" type="module"></script>
   <script src="js/functions.js" defer></script>
 </body>

@@ -714,7 +714,7 @@ main {
   background-color: #fd4d4b;
   color:#ffffff;
   font-size: 12px;
-  margin-top: -20px;
+  margin-top: 0; /* Изменила с -20px на 0, иначе внизу ошибки обрезались бы */
   z-index: 10000;
   position: relative;
 }
