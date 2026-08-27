@@ -1,11 +1,30 @@
 import {isEscapeKey, stopEscapePropagation} from './utils.js';
 
 const HASHTAG_REGEX = /^#[a-zA-Zа-яё0-9]{1,19}$/i;
-
+const MAX_HASHTAGS = 5;
+const MIN_SYMBOLS = 2;
+const MAX_SYMBOLS = 20;
+const MAX_LENGTH = 140;
 const RULES = [
   {
-    check: (tags) => !tags.every((tag) => HASHTAG_REGEX.test(tag)), // каждый хэштег проверяется на то, соответствует ли он регулярному выражению
-    message: '•  Неверный хэштег: хэштег должен начинаться с #, быть длиной 2 - 20 символов, включая #, и может содержать только буквы и цифры'
+    check: (tags) => tags.some((tag) => tag.slice(1).includes('#')),
+    message: '• Хэштеги разделяются пробелами'
+  },
+  {
+    check: (tags) => tags.some((tag) => tag.length > MAX_SYMBOLS),
+    message: `• Максимальная длина хэштега - ${MAX_SYMBOLS} символов, включая решётку`
+  },
+  {
+    check: (tags) => tags.some((tag) => !HASHTAG_REGEX.test(tag) && tag.length >= MIN_SYMBOLS), // каждый хэштег проверяется на то, соответствует ли он регулярному выражению. + Проверка на минимальную длину - когда набрана ещё только решётка, то не показывается сообщение о буквах и цифрах.
+    message: '• Хэштег должен содержать только буквы и цифры'
+  },
+  {
+    check: (tags) => tags.some((tag) => tag === '#'),
+    message: '• Хэштег не может состоять только из одной решётки'
+  },
+  {
+    check: (tags) => tags.some((tag) => tag[0] !== '#'),
+    message: '• Хэштег должен начинаться с символа #'
   },
   {
     check: (tags) => {
@@ -13,11 +32,11 @@ const RULES = [
       const newLowerCaseTags = new Set(lowerCaseTags); // Убираем повторяющиеся хэштеги (если они есть)
       return lowerCaseTags.length !== newLowerCaseTags.size;
     },
-    message: '•  Хэштеги не должны повторяться'
+    message: '• Хэштеги не должны повторяться'
   },
   {
-    check: (tags) => tags.length > 5,
-    message: '•  Должно быть не более 5 хэштегов'
+    check: (tags) => tags.length > MAX_HASHTAGS,
+    message: `• Нельзя указывать больше ${MAX_HASHTAGS} ${getHashtagForm(MAX_HASHTAGS)}`
   },
 ];
 
@@ -27,13 +46,12 @@ const imageEditOverlay = document.querySelector('.img-upload__overlay'); // ок
 const fileCloseElement = imageUploadForm.querySelector('.img-upload__cancel'); // кнопка закрытия формы редактирования изображения
 const hashtags = document.querySelector('.text__hashtags');
 const description = document.querySelector('.text__description');
+let errorMessage = '';
 
 const pristine = new Pristine(imageUploadForm, {
   classTo: 'img-upload__field-wrapper', // Элемент, на который будут добавляться классы
   errorClass: 'img-upload__field-wrapper--error', // Класс, обозначающий невалидное поле
   errorTextParent: 'img-upload__field-wrapper', // Элемент, куда будет выводиться текст с ошибкой
-  errorTextTag: 'div', // Тег для текста ошибки
-  errorTextClass: 'pristine-error' // Класс для элемента с текстом ошибки
 });
 
 const openFileToEdit = () => {
@@ -60,33 +78,33 @@ function onFormKeydown (evt) { // Объявлена декларативно, �
   }
 }
 
-// Функция возвращает массив ошибок для хэштегов
-const getHashtagsErrors = (value) => {
+// Функция склоняет слово "хэштег". Объявлена декларативно, так как использована в массиве RULES, а массив RULES должен быть в начале модуля, до функций
+function getHashtagForm(number) {
+  const lastDigit = number % 10;
+  const lastTwoDigits = number % 100;
+  return (lastDigit === 1 && lastTwoDigits !== 11) ? 'хэштега' : 'хэштегов';
+}
+
+// Функция возвращает текущее сообщение об ошибке
+const getErrorMessage = () => errorMessage;
+
+const validateHashtags = (value) => {
+  errorMessage = '';
   const trimmedValue = value.trim();
   if (trimmedValue === '') {
-    return []; // если массив пуст, ошибок нет
+    return true; // если массив пуст, ошибок нет
   }
   const tags = trimmedValue.split(/\s+/); // Получаем из строки с хэштегами массив
-  const errors = [];
-  RULES.forEach((rule) => {
-    if (rule.check(tags)) { // Если ошибка нашлась, то добавляем сообщение об ошибке в массив errors
-      errors.push(rule.message);
+  return RULES.every((rule) => {
+    const isError = rule.check(tags);
+    if(isError) {
+      errorMessage = rule.message;
     }
+    return !isError;
   });
-  return errors;
 };
 
-const validateHashtags = (value) => getHashtagsErrors(value).length === 0; // Проверяем, равна ли длина массива ошибок нулю (т.е. нет ошибок)
-
-const validateDescription = (value) => value.length <= 140;
-
-const validateFileType = () => {
-  const fileToUpload = file.files[0]; // загруженный файл
-  if (!fileToUpload) {
-    return true; // если файл не выбран — поле валидно
-  }
-  return fileToUpload.type.startsWith('image/'); // проверяем, является ли файл изображением
-};
+const validateDescription = (value) => value.length <= MAX_LENGTH;
 
 file.addEventListener('change', openFileToEdit);
 
@@ -96,12 +114,8 @@ hashtags.addEventListener('keydown', stopEscapePropagation);
 
 description.addEventListener('keydown', stopEscapePropagation);
 
-pristine.addValidator(hashtags, validateHashtags, (value) => {
-  const errorsFound = getHashtagsErrors(value);
-  return errorsFound.join('; ');
-});
-pristine.addValidator(description, validateDescription, 'Длина описания - не более 140 символов.');
-pristine.addValidator(file, validateFileType, 'Файл не является изображением.');
+pristine.addValidator(hashtags, validateHashtags, getErrorMessage);
+pristine.addValidator(description, validateDescription, `• Длина описания - не более ${MAX_LENGTH} символов.`);
 
 imageUploadForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
