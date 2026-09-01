@@ -1,4 +1,5 @@
 import {isEscapeKey, stopEscapePropagation} from './utils.js';
+import {resetFilters} from './filters.js';
 
 const HASHTAG_REGEX = /^#[a-zA-Zа-яё0-9]{1,19}$/i;
 const MAX_HASHTAGS = 5;
@@ -15,7 +16,7 @@ const RULES = [
     message: `• Максимальная длина хэштега - ${MAX_SYMBOLS} символов, включая решётку`
   },
   {
-    check: (tags) => tags.some((tag) => !HASHTAG_REGEX.test(tag) && tag.length >= MIN_SYMBOLS), // каждый хэштег проверяется на то, соответствует ли он регулярному выражению. + Проверка на минимальную длину - когда набрана ещё только решётка, то не показывается сообщение о буквах и цифрах.
+    check: (tags) => tags.some((tag) => !HASHTAG_REGEX.test(tag) && tag.length >= MIN_SYMBOLS), // каждый хэштег проверяется на то, соответствует ли он регулярному выражению + Проверка на минимальную длину - когда набрана ещё только решётка, то не показывается сообщение о буквах и цифрах
     message: '• Хэштег должен содержать только буквы и цифры'
   },
   {
@@ -41,7 +42,7 @@ const RULES = [
 ];
 
 const imageUploadForm = document.querySelector('.img-upload__form'); // форма для загрузки и редактирования изображения
-const file = document.querySelector('.img-upload__input');
+const file = document.querySelector('.img-upload__input'); // кнопка для загрузки файла
 const imageEditOverlay = document.querySelector('.img-upload__overlay'); // окно редактирования изображения, появляется после выбора файла
 const fileCloseElement = imageUploadForm.querySelector('.img-upload__cancel'); // кнопка закрытия формы редактирования изображения
 const hashtags = document.querySelector('.text__hashtags');
@@ -63,6 +64,7 @@ const openFileToEdit = () => {
 };
 
 const closeFileToEdit = () => {
+  resetFilters();
   imageEditOverlay.classList.add('hidden');
   document.removeEventListener('keydown', onFormKeydown);
   document.body.classList.remove('modal-open');
@@ -78,7 +80,7 @@ function onFormKeydown (evt) { // Объявлена декларативно, �
   }
 }
 
-// Функция склоняет слово "хэштег". Объявлена декларативно, так как использована в массиве RULES, а массив RULES должен быть в начале модуля, до функций
+// Функция склоняет слово "хэштег"; объявлена декларативно, так как использована в массиве RULES, а массив RULES должен быть в начале модуля, до функций
 function getHashtagForm(number) {
   const lastDigit = number % 10;
   const lastTwoDigits = number % 100;
@@ -115,7 +117,7 @@ hashtags.addEventListener('keydown', stopEscapePropagation);
 description.addEventListener('keydown', stopEscapePropagation);
 
 pristine.addValidator(hashtags, validateHashtags, getErrorMessage);
-pristine.addValidator(description, validateDescription, `• Длина описания - не более ${MAX_LENGTH} символов.`);
+pristine.addValidator(description, validateDescription, `• Длина описания - не более ${MAX_LENGTH} символов`);
 
 imageUploadForm.addEventListener('submit', (evt) => {
   evt.preventDefault();

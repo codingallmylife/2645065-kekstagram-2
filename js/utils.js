@@ -1,4 +1,4 @@
-// Функция генерирует значения, которые могут повторяться.
+// Функция генерирует значения, которые могут повторяться
 const getRandomInteger = (min, max) => {
   const lower = Math.ceil(Math.min(min, max));
   const upper = Math.floor(Math.max(min, max));
@@ -6,7 +6,7 @@ const getRandomInteger = (min, max) => {
   return Math.floor(result);
 };
 
-// Функция генерирует уникальные значения.
+// Функция генерирует уникальные значения
 const getRandomUniqueInteger = (min, max) => {
   const previousValues = [];
   return function () {
@@ -22,13 +22,13 @@ const getRandomUniqueInteger = (min, max) => {
   };
 };
 
-// Функция получает случайный элемент массива.
+// Функция получает случайный элемент массива
 const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
 
-// Функция проверяет, нажата ли клавиша Escape.
+// Функция проверяет, нажата ли клавиша Escape
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-// Функция предотвращает всплытие события при нажатии Escape.
+// Функция предотвращает всплытие события при нажатии Escape
 
 const stopEscapePropagation = (evt) => {
   if (isEscapeKey(evt)) {

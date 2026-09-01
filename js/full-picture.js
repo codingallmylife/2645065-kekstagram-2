@@ -2,7 +2,7 @@ import {isEscapeKey} from './utils.js';
 
 const COUNT_STEP = 5;
 let shownCommentsCount = 0;
-let currentPhoto = null; // Текущий объект фотографии, открытой в полноразмерном окне. Нужен, чтобы обработчик кнопки "Загрузить ещё" знал, из какого массива брать следующие комментарии
+let currentPhoto = null; // Текущий объект фотографии, открытой в полноразмерном окне - он нужен, чтобы обработчик кнопки "Загрузить ещё" знал, из какого массива брать следующие комментарии
 const bigPictureContent = document.querySelector('.big-picture'); // всё содержимое окна с картинкой
 const bigPictureCloseElement = bigPictureContent.querySelector('.big-picture__cancel'); // кнопка закрытия окна
 const bigPicture = bigPictureContent.querySelector('img'); // сама полноразмерная картинка в DOM
