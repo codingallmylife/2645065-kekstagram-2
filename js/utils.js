@@ -28,4 +28,12 @@ const getRandomArrayElement = (elements) => elements[getRandomInteger(0, element
 // Функция проверяет, нажата ли клавиша Escape.
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-export {getRandomInteger, getRandomUniqueInteger, getRandomArrayElement, isEscapeKey};
+// Функция предотвращает всплытие события при нажатии Escape.
+
+const stopEscapePropagation = (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.stopPropagation();
+  }
+};
+
+export {getRandomInteger, getRandomUniqueInteger, getRandomArrayElement, isEscapeKey, stopEscapePropagation};

@@ -1,7 +1,6 @@
 import {isEscapeKey} from './utils.js';
 
 const COUNT_STEP = 5;
-// eslint-disable-next-line prefer-const
 let shownCommentsCount = 0;
 let currentPhoto = null; // Текущий объект фотографии, открытой в полноразмерном окне. Нужен, чтобы обработчик кнопки "Загрузить ещё" знал, из какого массива брать следующие комментарии
 const bigPictureContent = document.querySelector('.big-picture'); // всё содержимое окна с картинкой
@@ -55,7 +54,29 @@ const showComments = (photo) => {
   }
 };
 
-commentsLoader.addEventListener('click', () => { // обработчик кнопки "Загрузить ещё"
+const openBigPicture = (photo) => {
+  document.body.classList.add('modal-open');
+  bigPictureContent.classList.remove('hidden');
+  document.addEventListener('keydown', onBigPictureKeydown);
+  renderBigPicture(photo);
+  showComments(photo);
+};
+
+const closeBigPicture = () => {
+  bigPictureContent.classList.add('hidden');
+  document.removeEventListener('keydown', onBigPictureKeydown);
+  document.body.classList.remove('modal-open');
+  shownCommentsCount = 0;
+};
+
+function onBigPictureKeydown (evt) { // Объявлена декларативно, иначе возникала бы ошибка "функция вызвана до её объявления"
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
+    closeBigPicture();
+  }
+}
+
+const loadMoreComments = () => {
   if (!currentPhoto) {
     return; // Если currentPhoto не установлена (окно закрыто или ошибка) - выходим из обработчика, чтобы избежать ошибки
   }
@@ -69,32 +90,10 @@ commentsLoader.addEventListener('click', () => { // обработчик кно�
       commentsLoader.classList.add('hidden');
     }
   }
-});
-
-const openBigPicture = (photo) => {
-  document.body.classList.add('modal-open');
-  bigPictureContent.classList.remove('hidden');
-  document.addEventListener('keydown', onDocumentKeydown);
-  renderBigPicture(photo);
-  showComments(photo);
 };
 
-const closeBigPicture = () => {
-  bigPictureContent.classList.add('hidden');
-  document.removeEventListener('keydown', onDocumentKeydown);
-  document.body.classList.remove('modal-open');
-  shownCommentsCount = 0;
-};
+commentsLoader.addEventListener('click', loadMoreComments); // обработчик кнопки "Загрузить ещё"
 
-bigPictureCloseElement.addEventListener('click', () => {
-  closeBigPicture();
-});
-
-function onDocumentKeydown (evt) { // Объявлена декларативно, иначе возникала бы ошибка "функция вызвана до её объявления"
-  if (isEscapeKey(evt)) {
-    evt.preventDefault();
-    closeBigPicture();
-  }
-}
+bigPictureCloseElement.addEventListener('click', closeBigPicture);
 
 export {openBigPicture};
