@@ -1,7 +1,7 @@
 import {photoGallery, renderThumbnails, thumbnail} from './thumbnails.js';
 import {openBigPicture} from './full-picture.js';
 import './form.js';
-import './filters.js';
+import './img-preview.js';
 
 renderThumbnails();
 
