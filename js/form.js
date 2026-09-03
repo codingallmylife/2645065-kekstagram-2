@@ -1,4 +1,5 @@
 import {isEscapeKey, stopEscapePropagation} from './utils.js';
+import {resetFilters} from './img-preview.js';
 
 const HASHTAG_REGEX = /^#[a-zA-Zа-яё0-9]{1,19}$/i;
 const MAX_HASHTAGS = 5;
@@ -8,23 +9,23 @@ const MAX_LENGTH = 140;
 const RULES = [
   {
     check: (tags) => tags.some((tag) => tag.slice(1).includes('#')),
-    message: '• Хэштеги разделяются пробелами'
+    message: 'Хэштеги разделяются пробелами'
   },
   {
     check: (tags) => tags.some((tag) => tag.length > MAX_SYMBOLS),
-    message: `• Максимальная длина хэштега - ${MAX_SYMBOLS} символов, включая решётку`
+    message: `Максимальная длина хэштега - ${MAX_SYMBOLS} символов, включая решётку`
   },
   {
-    check: (tags) => tags.some((tag) => !HASHTAG_REGEX.test(tag) && tag.length >= MIN_SYMBOLS), // каждый хэштег проверяется на то, соответствует ли он регулярному выражению. + Проверка на минимальную длину - когда набрана ещё только решётка, то не показывается сообщение о буквах и цифрах.
-    message: '• Хэштег должен содержать только буквы и цифры'
+    check: (tags) => tags.some((tag) => !HASHTAG_REGEX.test(tag) && tag.length >= MIN_SYMBOLS), // каждый хэштег проверяется на то, соответствует ли он регулярному выражению + Проверка на минимальную длину - когда набрана ещё только решётка, то не показывается сообщение о буквах и цифрах
+    message: 'Хэштег должен содержать только буквы и цифры'
   },
   {
     check: (tags) => tags.some((tag) => tag === '#'),
-    message: '• Хэштег не может состоять только из одной решётки'
+    message: 'Хэштег не может состоять только из одной решётки'
   },
   {
     check: (tags) => tags.some((tag) => tag[0] !== '#'),
-    message: '• Хэштег должен начинаться с символа #'
+    message: 'Хэштег должен начинаться с символа #'
   },
   {
     check: (tags) => {
@@ -32,16 +33,16 @@ const RULES = [
       const newLowerCaseTags = new Set(lowerCaseTags); // Убираем повторяющиеся хэштеги (если они есть)
       return lowerCaseTags.length !== newLowerCaseTags.size;
     },
-    message: '• Хэштеги не должны повторяться'
+    message: 'Хэштеги не должны повторяться'
   },
   {
     check: (tags) => tags.length > MAX_HASHTAGS,
-    message: `• Нельзя указывать больше ${MAX_HASHTAGS} ${getHashtagForm(MAX_HASHTAGS)}`
+    message: `Нельзя указывать больше ${MAX_HASHTAGS} ${getHashtagForm(MAX_HASHTAGS)}`
   },
 ];
 
 const imageUploadForm = document.querySelector('.img-upload__form'); // форма для загрузки и редактирования изображения
-const file = document.querySelector('.img-upload__input');
+const file = document.querySelector('.img-upload__input'); // кнопка для загрузки файла
 const imageEditOverlay = document.querySelector('.img-upload__overlay'); // окно редактирования изображения, появляется после выбора файла
 const fileCloseElement = imageUploadForm.querySelector('.img-upload__cancel'); // кнопка закрытия формы редактирования изображения
 const hashtags = document.querySelector('.text__hashtags');
@@ -63,12 +64,12 @@ const openFileToEdit = () => {
 };
 
 const closeFileToEdit = () => {
+  resetFilters();
   imageEditOverlay.classList.add('hidden');
   document.removeEventListener('keydown', onFormKeydown);
   document.body.classList.remove('modal-open');
-  file.value = '';
-  hashtags.value = '';
-  description.value = '';
+  imageUploadForm.reset();
+  pristine.reset();
 };
 
 function onFormKeydown (evt) { // Объявлена декларативно, иначе возникала бы ошибка "функция вызвана до её объявления"
@@ -78,7 +79,7 @@ function onFormKeydown (evt) { // Объявлена декларативно, �
   }
 }
 
-// Функция склоняет слово "хэштег". Объявлена декларативно, так как использована в массиве RULES, а массив RULES должен быть в начале модуля, до функций
+// Функция склоняет слово "хэштег"; объявлена декларативно, так как использована в массиве RULES, а массив RULES должен быть в начале модуля, до функций
 function getHashtagForm(number) {
   const lastDigit = number % 10;
   const lastTwoDigits = number % 100;
@@ -115,7 +116,7 @@ hashtags.addEventListener('keydown', stopEscapePropagation);
 description.addEventListener('keydown', stopEscapePropagation);
 
 pristine.addValidator(hashtags, validateHashtags, getErrorMessage);
-pristine.addValidator(description, validateDescription, `• Длина описания - не более ${MAX_LENGTH} символов.`);
+pristine.addValidator(description, validateDescription, `Длина описания - не более ${MAX_LENGTH} символов`);
 
 imageUploadForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
