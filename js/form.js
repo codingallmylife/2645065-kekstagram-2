@@ -1,5 +1,6 @@
 import {isEscapeKey, stopEscapePropagation} from './utils.js';
-import {resetFilters} from './img-preview.js';
+import {resetFilters} from './image-preview.js';
+import {blockSubmitButton, onFormSubmit} from './send-form.js';
 
 const HASHTAG_REGEX = /^#[a-zA-Zа-яё0-9]{1,19}$/i;
 const MAX_HASHTAGS = 5;
@@ -74,6 +75,10 @@ const closeFileToEdit = () => {
 
 function onFormKeydown (evt) { // Объявлена декларативно, иначе возникала бы ошибка "функция вызвана до её объявления"
   if (isEscapeKey(evt)) {
+    const message = document.querySelector('.success') || document.querySelector('.error');
+    if (message) {
+      return; // Не закрываем оверлей
+    }
     evt.preventDefault();
     closeFileToEdit();
   }
@@ -121,7 +126,12 @@ pristine.addValidator(description, validateDescription, `Длина описан
 imageUploadForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
   const isValid = pristine.validate();
-  if (isValid) {
-    imageUploadForm.submit();
+  if (!isValid) {
+    return;
   }
+  blockSubmitButton();
+  const formData = new FormData(evt.target);
+  onFormSubmit(formData, closeFileToEdit);
 });
+
+export {closeFileToEdit};
