@@ -21,4 +21,12 @@ const appendElementFromTemplate = (templateId, selector) => {
   return element;
 };
 
-export {appendElementFromTemplate, isEscapeKey, stopEscapePropagation};
+const debounce = (callback, timeoutDelay = 500) => {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
+
+export {appendElementFromTemplate, debounce, isEscapeKey, stopEscapePropagation};
