@@ -1,3 +1,5 @@
+const DEBOUNCE_DELAY = 500;
+
 // Функция проверяет, нажата ли клавиша Escape
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
@@ -21,7 +23,7 @@ const appendElementFromTemplate = (templateId, selector) => {
   return element;
 };
 
-const debounce = (callback, timeoutDelay = 500) => {
+const debounce = (callback, timeoutDelay = DEBOUNCE_DELAY) => {
   let timeoutId;
   return (...rest) => {
     clearTimeout(timeoutId);

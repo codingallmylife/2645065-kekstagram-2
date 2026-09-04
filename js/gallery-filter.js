@@ -1,6 +1,7 @@
 import {renderThumbnails} from './thumbnails.js';
 import {debounce} from './utils.js';
 
+const MAX_PICTURE_COUNT = 10;
 const allFilters = document.querySelectorAll('.img-filters__button');
 const imageFilters = document.querySelector('.img-filters'); // контейнер с кнопками фильтров
 const filtersForm = document.querySelector('.img-filters__form');
@@ -14,7 +15,7 @@ const getFilteredPhotos = (filterType) => {
       return currentPhotos.slice();
     case 'random': {
       const randomPhotos = currentPhotos.slice().sort(() => Math.random() - 0.5); // Сортируем копию массива случайным образом: вычитание 0.5 из Math.random() даёт как отрицательные, так и положительные числа, что заставляет sort() менять элементы местами непредсказуемо
-      return randomPhotos.slice(0, 10);
+      return randomPhotos.slice(0, MAX_PICTURE_COUNT);
     }
     case 'discussed':
       return currentPhotos.slice().sort((a, b) => b.comments.length - a.comments.length);
