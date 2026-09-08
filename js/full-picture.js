@@ -76,7 +76,7 @@ function onBigPictureKeydown (evt) { // Объявлена декларатив�
   }
 }
 
-const loadMoreComments = () => {
+const onCommentsLoaderClick = () => { // Обработчик кнопки "Загрузить ещё"
   if (!currentPhoto) {
     return; // Если currentPhoto не установлена (окно закрыто или ошибка) - выходим из обработчика, чтобы избежать ошибки
   }
@@ -92,8 +92,10 @@ const loadMoreComments = () => {
   }
 };
 
-commentsLoader.addEventListener('click', loadMoreComments); // обработчик кнопки "Загрузить ещё"
+const onBigPictureCloseClick = () => closeBigPicture();
 
-bigPictureCloseElement.addEventListener('click', closeBigPicture);
+commentsLoader.addEventListener('click', onCommentsLoaderClick);
+
+bigPictureCloseElement.addEventListener('click', onBigPictureCloseClick);
 
 export { openBigPicture };
